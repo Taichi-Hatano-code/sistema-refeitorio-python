@@ -1,0 +1,9 @@
+detonar tudo 
+sudo docker compose down --volumes
+
+so desligar
+sudo docker compose stop
+
+ligar db
+sudo docker compose up -d
+

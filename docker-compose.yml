@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16
+    container_name: meu-postgres
+    restart: always
+    # Dizemos ao Docker onde está o arquivo de variáveis
+    env_file:
+      - .env
+    environment:
+      # Aqui usamos as variáveis definidas no .env
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -1,0 +1,21 @@
+# --- Segurança (CRÍTICO) ---
+.env
+config.pyc
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+
+# --- IDEs e Editores ---
+.vscode/
+.idea/
+*.swp
+
+# --- Sistema Operacional ---
+.DS_Store
+Thumbs.db

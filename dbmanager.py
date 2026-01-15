@@ -1,0 +1,75 @@
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
+from werkzeug.security import generate_password_hash
+import models
+import os
+
+from config import DATABASE_URL, SECRET_KEY
+
+class dbmanager():
+    def __init__(self, url):
+
+        self.engine = create_engine(url)
+
+        models.Base.metadata.create_all(self.engine)
+
+    def inserirfuncionario(self,cpf2,nome2,empresa2,cargo2,senha2):
+
+        with Session(self.engine) as session:
+            try:
+
+                senhacripto = generate_password_hash(senha2)
+
+                # --- CREATE (Criar) ---
+                novo_usuario = models.Colaborador(cpf = cpf2, nome = nome2, empresa = empresa2, cargo = cargo2, senha = senhacripto)
+                
+                # Adicionamos à "área de preparação" da sessão
+                session.add_all([novo_usuario])
+                
+                # Confirmamos a gravação no banco
+                session.commit()
+
+                return True
+            
+            except Exception as e:
+                session.rollback()
+                print(f"error ao salvar {e}")
+
+                return False
+            
+    def refeicao(self,cpf2,tipo2):
+    
+        with Session(self.engine) as session:
+                try:
+                    # --- CREATE (Criar) ---
+                    nova_refeicao = models.Refeicao(funcionario_cpf = cpf2,tipo = tipo2)
+                    
+                    # Adicionamos à "área de preparação" da sessão
+                    session.add_all([nova_refeicao])
+                    
+                    # Confirmamos a gravação no banco
+                    session.commit()
+
+                    return True
+                
+                except Exception as e:
+                    session.rollback()
+                    print(f"error ao salvar {e}")
+
+                    return False
+
+    def get_colaborador_by_cpf(self, cpf_busca):
+        with Session(self.engine) as session:
+            try:
+                # 1. Monta o Select: "Selecione o Colaborador onde o cpf é igual ao cpf_busca"
+                stmt = select(models.Colaborador).where(models.Colaborador.cpf == cpf_busca)
+                
+                # 2. Executa e pega o primeiro resultado escalar (o objeto)
+                # Se não achar ninguém, retorna None
+                usuario = session.scalars(stmt).first()
+                
+                return usuario
+                
+            except Exception as e:
+                print(f"Erro ao buscar usuário: {e}")
+                return None

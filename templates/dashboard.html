@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel - Sistema</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: #121212; /* Fundo Preto */
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            min-height: 100vh;
+        }
+
+        h1 { font-weight: 300; margin-bottom: 10px; }
+        .subtitle { color: #888; margin-bottom: 40px; }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+        }
+
+        /* Estilo dos Cards */
+        .card {
+            background-color: #1e1e1e; /* Card Cinza Escuro */
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            width: 250px;
+            border: 1px solid #333;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito ao passar o mouse */
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-color: #555;
+        }
+
+        /* Barrinha colorida no topo de cada card */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+        }
+
+        /* Cores específicas */
+        .card.cafe::before { background-color: #f39c12; }   /* Laranja */
+        .card.almoco::before { background-color: #e74c3c; } /* Vermelho */
+        .card.janta::before { background-color: #3498db; }  /* Azul */
+
+        .card h2 { margin: 20px 0; font-size: 1.5rem; }
+        
+        .icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+
+        /* Botão de Registrar */
+        button {
+            background-color: #2c2c2c;
+            color: white;
+            border: 1px solid #444;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #03dac6; /* Verde Neon */
+            color: #121212;
+            border-color: #03dac6;
+            font-weight: bold;
+        }
+
+        /* Mensagens de Feedback (Flash) */
+        .flash-container {
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .flash-msg {
+            background-color: #03dac6;
+            color: #121212;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* Link de Sair */
+        .logout {
+            margin-top: 50px;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: 0.3s;
+        }
+
+        .logout:hover { color: #cf6679; border-color: #cf6679; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Olá, {{ current_user.nome }}</h1>
+    <p class="subtitle">Selecione a refeição para registrar seu ponto.</p>
+
+    <div class="flash-container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash-msg">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container">
+        
+        <div class="card cafe">
+            <span class="icon">☕</span>
+            <h2>Café</h2>
+            <form action="{{ url_for('registrar_refeicao') }}" method="POST">
+                <input type="hidden" name="tipo_refeicao" value="Café da Manhã">
+                <button type="submit">Registrar</button>
+            </form>
+        </div>
+
+        <div class="card almoco">
+            <span class="icon">🍽️</span>
+            <h2>Almoço</h2>
+            <form action="{{ url_for('registrar_refeicao') }}" method="POST">
+                <input type="hidden" name="tipo_refeicao" value="Almoço">
+                <button type="submit">Registrar</button>
+            </form>
+        </div>
+
+        <div class="card janta">
+            <span class="icon">🍲</span>
+            <h2>Jantar</h2>
+            <form action="{{ url_for('registrar_refeicao') }}" method="POST">
+                <input type="hidden" name="tipo_refeicao" value="Jantar">
+                <button type="submit">Registrar</button>
+            </form>
+        </div>
+
+    </div>
+
+    <a href="/logout" class="logout">Encerrar Sessão (Sair)</a>
+
+</body>
+</html>
