@@ -1,7 +1,8 @@
 # models.py
 from flask_login import UserMixin
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy import String, ForeignKey, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from datetime import datetime
 
 # 1. Criamos a Base aqui
 class Base(DeclarativeBase):
@@ -29,6 +30,7 @@ class Refeicao(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     tipo: Mapped[str] = mapped_column(String(50))
+    data: Mapped[datetime] =  mapped_column(DateTime, default=datetime.now)
     
     # FK
     funcionario_cpf: Mapped[str] = mapped_column(ForeignKey("colaborador.cpf"))

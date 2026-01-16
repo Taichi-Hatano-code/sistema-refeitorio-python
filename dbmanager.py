@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, select, Date, cast
+from sqlalchemy.orm import Session, joinedload
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 import models
 import os
 
@@ -73,3 +74,24 @@ class dbmanager():
             except Exception as e:
                 print(f"Erro ao buscar usuário: {e}")
                 return None
+
+    def quant_refei_detl(self,date):
+        with Session(self.engine) as session:
+            try:
+
+                data_formatada = datetime.strptime(date, "%d/%m/%Y").date()
+
+                # 1. Monta o Select: "Selecione o Colaborador onde o cpf é igual ao cpf_busca"
+                stmt = select(models.Refeicao).options(joinedload(models.Refeicao.funcionario)).where(
+                    cast(models.Refeicao.data, Date) == data_formatada
+                )
+
+                # 2. Executa e pega o primeiro resultado escalar (o objeto)
+                # Se não achar ninguém, retorna None
+                refeicoes = session.scalars(stmt).all()
+
+                return refeicoes
+                
+            except Exception as e:
+                print(f"Erro ao buscar usuário: {e}")
+                return 
