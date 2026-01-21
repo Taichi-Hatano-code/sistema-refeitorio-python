@@ -58,6 +58,35 @@ class dbmanager():
                     print(f"error ao salvar {e}")
 
                     return False
+                
+    def refeicaoADM(self,cpf2,tipo2,quant):
+    
+        with Session(self.engine) as session:
+                try:
+
+                    quantidade = int(quant)
+
+                    lista_para_salvar = []
+
+                    for _ in range(quantidade):
+                        # --- CREATE (Criar) ---
+                        nova_refeicao = models.Refeicao(funcionario_cpf = cpf2,tipo = tipo2)
+                        lista_para_salvar.append(nova_refeicao)
+
+
+                    # Adicionamos à "área de preparação" da sessão
+                    session.add_all(lista_para_salvar)
+                    
+                    # Confirmamos a gravação no banco
+                    session.commit()
+
+                    return True
+                
+                except Exception as e:
+                    session.rollback()
+                    print(f"error ao salvar {e}")
+
+                    return False
 
     def get_colaborador_by_cpf(self, cpf_busca):
         with Session(self.engine) as session:

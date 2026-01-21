@@ -1,6 +1,12 @@
 # --- Segurança (CRÍTICO) ---
 .env
+config.py
 config.pyc
+
+# --- Dados e Arquivos Pesados ---
+static/
+*.db
+instance/
 
 # --- Python ---
 __pycache__/

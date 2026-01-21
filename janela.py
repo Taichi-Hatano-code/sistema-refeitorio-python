@@ -109,8 +109,8 @@ class tela_relatorio(QWidget):
 
         # --- TABELA ---
         self.tabela = QTableWidget()
-        self.tabela.setColumnCount(4)
-        self.tabela.setHorizontalHeaderLabels(["Hora", "Nome", "Cargo", "Refeição"])
+        self.tabela.setColumnCount(5)
+        self.tabela.setHorizontalHeaderLabels(["Hora", "Nome", "Empresa", "Cargo", "Refeição"])
         header = self.tabela.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.tabela)
@@ -151,7 +151,7 @@ class tela_relatorio(QWidget):
         # 3. Preenche a Tabela e Conta
         for linha, ref in enumerate(lista_refeicoes):
             # Contagem
-            if ref.tipo == "Café da manhã": qtd_cafe += 1
+            if ref.tipo == "Café": qtd_cafe += 1
             elif ref.tipo == "Almoço": qtd_almoco += 1
             elif ref.tipo == "Jantar": qtd_jantar += 1
 
@@ -165,12 +165,14 @@ class tela_relatorio(QWidget):
             nome = ref.funcionario.nome
             cargo = ref.funcionario.cargo
             tipo = ref.tipo
+            empresa = ref.funcionario.empresa
 
             # Coloca nas células (Linha, Coluna, Item)
             self.tabela.setItem(linha, 0, QTableWidgetItem(hora))
             self.tabela.setItem(linha, 1, QTableWidgetItem(nome))
-            self.tabela.setItem(linha, 2, QTableWidgetItem(cargo))
-            self.tabela.setItem(linha, 3, QTableWidgetItem(tipo))
+            self.tabela.setItem(linha, 2, QTableWidgetItem(empresa))
+            self.tabela.setItem(linha, 3, QTableWidgetItem(cargo))
+            self.tabela.setItem(linha, 4, QTableWidgetItem(tipo))
 
         # 4. Atualiza os Labels do topo
         self.lbl_cafe.setText(f"☕ Cafés: {qtd_cafe}")
@@ -309,7 +311,7 @@ class tela_refeicao(QWidget):
         layout.addWidget(self.input_senha)
 
         self.combo = QComboBox()
-        self.combo.addItems(["Café da manhã", "Almoço", "Jantar"])
+        self.combo.addItems(["Café", "Almoço", "Jantar"])
         layout.addWidget(self.combo)
 
         button = QPushButton("Registrar")
