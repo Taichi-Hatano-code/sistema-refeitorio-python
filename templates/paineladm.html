@@ -9,7 +9,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
         body {
-            background-color: #121212; /* Fundo Preto */
+            background-color: #121212;
             color: #e0e0e0;
             display: flex;
             flex-direction: column;
@@ -18,15 +18,9 @@
             min-height: 100vh;
         }
 
-        /* Cabeçalho */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        h1 { color: #bb86fc; font-weight: 300; letter-spacing: 1px; margin-bottom: 5px; }
-        p.data-hoje { color: #888; font-size: 0.9rem; }
+        h1 { color: #bb86fc; font-weight: 300; letter-spacing: 1px; margin-bottom: 5px; text-align: center; }
+        p.data-hoje { color: #888; font-size: 0.9rem; text-align: center; margin-bottom: 20px; }
 
-        /* Container da Tabela */
         .relatorio-container {
             background-color: #1e1e1e;
             padding: 30px;
@@ -34,136 +28,158 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             width: 100%;
             max-width: 800px;
-            border: 1px solid #333;
+            margin-bottom: 20px;
         }
 
-        /* Estilo da Tabela */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        /* Tabela Responsiva */
+        .table-wrapper {
+            overflow-x: auto; /* Permite rolar pro lado no celular se precisar */
         }
 
-        th, td {
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #333;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 300px; }
+        th, td { padding: 15px; text-align: center; border-bottom: 1px solid #333; }
+        th { color: #bb86fc; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+        tr:last-child td { border-bottom: none; }
+        .row-total td { font-weight: bold; color: #03dac6; background-color: rgba(3, 218, 198, 0.05); }
+        .col-auth { color: #888; font-size: 0.9em; }
 
-        th {
-            color: #03dac6; /* Cor de destaque para colunas */
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-        }
-
-        tr:last-child td { border-bottom: none; } /* Remove linha do último item */
-        tr:hover { background-color: #2c2c2c; } /* Efeito ao passar o mouse */
-
-        /* Destaque para a coluna Autorizado */
-        .col-auth { color: #ffb74d; } 
-        
-        /* Linha de Total Geral */
-        .row-total {
-            background-color: #2d2d2d;
-            font-weight: bold;
-            color: #fff;
-        }
-        .row-total td { border-top: 2px solid #555; }
-
-        /* Botão Voltar */
         .btn-voltar {
-            margin-top: 30px;
             text-decoration: none;
-            color: #bb86fc;
-            border: 1px solid #bb86fc;
-            padding: 10px 25px;
-            border-radius: 50px;
+            color: #03dac6;
+            border: 1px solid #03dac6;
+            padding: 10px 20px;
+            border-radius: 20px;
             transition: 0.3s;
             font-size: 0.9rem;
+            margin-top: 20px;
+            display: inline-block;
         }
-        .btn-voltar:hover { background-color: #bb86fc; color: #000; }
+        .btn-voltar:hover { background-color: #03dac6; color: #121212; }
 
+        /* FORMULÁRIO DE LOTE */
+        .form-lote {
+            display: flex; 
+            gap: 15px; 
+            justify-content: center; 
+            align-items: center; 
+            flex-wrap: wrap;
+        }
+        
+        select, input {
+            padding: 10px; border-radius: 8px; border: 1px solid #444; 
+            background: #2c2c2c; color: white; outline: none;
+        }
+        
+        button.btn-lote {
+            background-color: #bb86fc; color: #000; font-weight: bold; border: none; cursor: pointer;
+            padding: 10px 20px; border-radius: 8px; transition: 0.3s;
+        }
+
+        /* --- MOBILE TWEAKS --- */
+        @media (max-width: 600px) {
+            body { padding: 20px 10px; }
+            
+            .relatorio-container { padding: 15px; }
+            
+            h1 { font-size: 1.5rem; }
+            
+            /* Ajusta tamanho da fonte da tabela */
+            th, td { padding: 10px 5px; font-size: 0.85rem; }
+            
+            /* Formulário empilhado no celular */
+            .form-lote { flex-direction: column; width: 100%; }
+            .form-lote select, .form-lote input, .form-lote button { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Relatório de Consumo</h1>
-        <p class="data-hoje"><script>document.write(new Date().toLocaleDateString('pt-BR'))</script></p>
+        <h1>Relatório Diário</h1>
+        <p class="data-hoje">{{ hoje }}</p>
     </header>
 
     <div class="relatorio-container">
-        <table>
-            <thead>
-                <tr>
-                    <th style="text-align: left;">Tipo de Refeição</th>
-                    <th>Comum</th>
-                    <th class="col-auth">Autorizado (Admin)</th>
-                    <th>Total Geral</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: left;">☕ Café da Manhã</td>
-                    <td>{{ dados['Cafe'] }}</td>
-                    <td class="col-auth">{{ dados['Cafe_Autorizado'] }}</td>
-                    <td>{{ dados['Cafe'] + dados['Cafe_Autorizado'] }}</td>
-                </tr>
+        <h2 style="color: #fff; font-weight: 300; margin-bottom: 20px; text-align: center;">Resumo Numérico</h2>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: left;">Tipo</th>
+                        <th>App</th>
+                        <th class="col-auth">Manual</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: left;">☕ Café</td>
+                        <td>{{ dados['Cafe'] }}</td>
+                        <td class="col-auth">{{ dados['Cafe_Autorizado'] }}</td>
+                        <td>{{ dados['Cafe'] + dados['Cafe_Autorizado'] }}</td>
+                    </tr>
 
-                <tr>
-                    <td style="text-align: left;">🍽️ Almoço</td>
-                    <td>{{ dados['Almoco'] }}</td>
-                    <td class="col-auth">{{ dados['Almoco_Autorizado'] }}</td>
-                    <td>{{ dados['Almoco'] + dados['Almoco_Autorizado'] }}</td>
-                </tr>
+                    <tr>
+                        <td style="text-align: left;">🍽️ Almoço</td>
+                        <td>{{ dados['Almoco'] }}</td>
+                        <td class="col-auth">{{ dados['Almoco_Autorizado'] }}</td>
+                        <td>{{ dados['Almoco'] + dados['Almoco_Autorizado'] }}</td>
+                    </tr>
 
-                <tr>
-                    <td style="text-align: left;">🍲 Jantar</td>
-                    <td>{{ dados['Jantar'] }}</td>
-                    <td class="col-auth">{{ dados['Jantar_Autorizado'] }}</td>
-                    <td>{{ dados['Jantar'] + dados['Jantar_Autorizado'] }}</td>
-                </tr>
+                    <tr>
+                        <td style="text-align: left;">🍲 Jantar</td>
+                        <td>{{ dados['Jantar'] }}</td>
+                        <td class="col-auth">{{ dados['Jantar_Autorizado'] }}</td>
+                        <td>{{ dados['Jantar'] + dados['Jantar_Autorizado'] }}</td>
+                    </tr>
 
-                <tr class="row-total">
-                    <td style="text-align: left;">Σ TOTAIS</td>
-                    <td>{{ dados['Cafe'] + dados['Almoco'] + dados['Jantar'] }}</td>
-                    <td class="col-auth">{{ dados['Cafe_Autorizado'] + dados['Almoco_Autorizado'] + dados['Jantar_Autorizado'] }}</td>
-                    <td>
-                        {{ 
-                           dados['Cafe'] + dados['Cafe_Autorizado'] + 
-                           dados['Almoco'] + dados['Almoco_Autorizado'] + 
-                           dados['Jantar'] + dados['Jantar_Autorizado'] 
-                        }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    <tr class="row-total">
+                        <td style="text-align: left;">Σ TOTAIS</td>
+                        <td>{{ dados['Cafe'] + dados['Almoco'] + dados['Jantar'] }}</td>
+                        <td class="col-auth">{{ dados['Cafe_Autorizado'] + dados['Almoco_Autorizado'] + dados['Jantar_Autorizado'] }}</td>
+                        <td>
+                            {{ 
+                            dados['Cafe'] + dados['Cafe_Autorizado'] + 
+                            dados['Almoco'] + dados['Almoco_Autorizado'] + 
+                            dados['Jantar'] + dados['Jantar_Autorizado'] 
+                            }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="relatorio-container" style="margin-top: 30px; text-align: center;">
+    <div class="relatorio-container" style="text-align: center;">
         <h2 style="color: #03dac6; font-weight: 300; margin-bottom: 20px;">⚡ Registro Rápido (Lote)</h2>
         
-        <form action="{{ url_for('registrar_refeicao_bulk') }}" method="POST" style="display: flex; gap: 15px; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <form action="{{ url_for('registrar_refeicao_bulk') }}" method="POST" class="form-lote">
             
-            <select name="tipo_refeicao" required style="padding: 10px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; outline: none;">
+            <select name="tipo_refeicao" required>
                 <option value="" disabled selected>Selecione a Refeição</option>
                 <option value="Café">☕ Café da Manhã</option>
                 <option value="Almoço">🍽️ Almoço</option>
                 <option value="Jantar">🍲 Jantar</option>
             </select>
 
-            <input type="number" name="quantidade" placeholder="Qtd." min="1" required 
-                   style="padding: 10px; width: 80px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; text-align: center; outline: none;">
+            <input type="number" name="quantidade" placeholder="Qtd." min="1" required>
 
-            <button type="submit" style="background-color: #bb86fc; color: #000; padding: 10px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;">
-                Registrar Lote
-            </button>
+            <button type="submit" class="btn-lote">Registrar</button>
         </form>
+        
+        <div style="margin-top: 15px;">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="color: #bb86fc; font-size: 0.9rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        </div>
     </div>
 
-    <a href="/dashboard" class="btn-voltar">← Voltar para Dashboard</a>
+    <a href="{{ url_for('home') }}" class="btn-voltar">← Voltar para Dashboard</a>
 
 </body>
 </html>
