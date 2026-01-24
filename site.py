@@ -147,6 +147,24 @@ def registrar_refeicao():
     # Pega o valor do input hidden (Cafe, Almoco ou Jantar)
     tipo_escolhido = request.form.get('tipo_refeicao')
     
+    hora_atual = datetime.now().hour
+
+    if tipo_escolhido == "Café":
+        if not (6<= hora_atual < 10):
+            flash('❌ Horário inválido! O Café só é servido das 06:00 às 10:00.')
+            logout_user()
+            return redirect(url_for('login'))
+    elif tipo_escolhido == "Almoço":
+        if not (11 <= hora_atual < 15):
+            flash('❌ Horário inválido! O Almoço só é servido das 11:00 às 15:00.')
+            logout_user()
+            return redirect(url_for('login'))
+    elif tipo_escolhido == "Jantar":
+        if not (18 <= hora_atual < 22):
+            flash('❌ Horário inválido! O Jantar só é servido das 18:00 às 22:00.')
+            logout_user()
+            return redirect(url_for('login'))
+    
     # Usa o seu dbmanager. 
     # Nota: Como o usuário já está logado, usamos os dados dele direto do current_user
     sucesso = db.refeicao(
