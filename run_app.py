@@ -5,11 +5,11 @@ import socket
 import threading
 from time import sleep
 
-# Importa o Flask e o Waitress
+# Importa Flask e Waitress
 from waitress import serve
-from site import app
+from web_site import app  # Certifique-se que o arquivo se chama web_site.py
 
-# Importa o PyQt e a sua Janela
+# Importa PyQt
 from PyQt6.QtWidgets import QApplication
 import janela
 
@@ -25,33 +25,35 @@ def get_ip():
     return ip
 
 def rodar_servidor():
-    """Função que fica rodando o site em background"""
-    # O host='0.0.0.0' permite acesso pelo celular
+    # Roda o site na porta 8080 liberado para a rede
     serve(app, host='0.0.0.0', port=8080)
 
-def abrir_navegador():
-    """Abre o navegador após 2 segundos"""
-    sleep(2)
-    webbrowser.open_new("http://localhost:8080")
-
 if __name__ == '__main__':
-    # 1. Configura pastas para funcionarem dentro do .exe (PyInstaller)
+    # Configuração de pastas (importante para o .exe ou Linux)
     if getattr(sys, 'frozen', False):
         base_dir = sys._MEIPASS
-        # Ajusta pastas do Flask
         app.template_folder = os.path.join(base_dir, 'templates')
         app.static_folder = os.path.join(base_dir, 'static')
     else:
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # 2. Mostra informações no Console (A janela preta que abre atrás)
+    # Mostra IPs no terminal
     meu_ip = get_ip()
     print("="*40)
-    print(f" SISTEMA HÍBRIDO INICIADO")
-    print(f" > App Desktop: Iniciando...")
-    print(f" > Web Local: http://localhost:8080")
-    print(f" > Web Celular: http://{meu_ip}:8080")
+    print(f" SISTEMA INICIADO")
+    print(f" > Acesso Local: http://localhost:8080")
+    print(f" > Acesso Celular: http://{meu_ip}:8080")
     print("="*40)
 
-    # 3. Inicia o Servidor Web em uma THREAD (Fio paralelo)
-    # daemon=True significa:
+    # 1. Inicia o Servidor (Flask) em segundo plano
+    t = threading.Thread(target=rodar_servidor)
+    t.daemon = True
+    t.start()
+
+    # 2. Inicia a Interface Gráfica (Janela)
+    app_qt = QApplication(sys.argv)
+    window = janela.MainWindow()
+    window.show()
+    
+    # Mantém o programa rodando até fechar a janela
+    sys.exit(app_qt.exec())

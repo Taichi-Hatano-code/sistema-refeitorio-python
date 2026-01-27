@@ -1,27 +1,23 @@
-# --- Segurança (CRÍTICO) ---
+# --- Segurança (CRÍTICO - NÃO MEXA AQUI) ---
 .env
 config.py
-config.pyc
-
-# --- Dados e Arquivos Pesados ---
-static/
-*.db
-instance/
-
-# --- Python ---
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
+
+# --- Dados e Arquivos Gerados ---
+*.db
+instance/
+build/
+dist/
+*.spec
+
+# --- Python e Ambiente ---
 venv/
 .venv/
 env/
 
-# --- IDEs e Editores ---
+# --- IDEs e Sistema ---
 .vscode/
 .idea/
-*.swp
-
-# --- Sistema Operacional ---
 .DS_Store
 Thumbs.db
