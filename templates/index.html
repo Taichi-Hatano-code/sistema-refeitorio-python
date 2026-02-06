@@ -103,58 +103,71 @@
     </div>
 
     <script>
-        // Truque para o VS Code não marcar erro
-        const vCafe = Number("{{ dados['Cafe'] }}");
-        const vAlmoco = Number("{{ dados['Almoco'] }}");
-        const vJantar = Number("{{ dados['Jantar'] }}");
+    // 1. Recebe os dados do Python convertidos para JSON real
+    const dadosEmpresas = {{ dados | tojson }};
 
-        const ctx = document.getElementById('graficoHome').getContext('2d');
+    // 2. Cores pré-definidas para as empresas (adicione mais se precisar)
+    const cores = [
+        '#FF6384', // Vermelho
+        '#36A2EB', // Azul
+        '#FFCE56', // Amarelo
+        '#4BC0C0', // Verde Água
+        '#9966FF', // Roxo
+        '#FF9F40'  // Laranja
+    ];
 
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Café', 'Almoço', 'Jantar'],
-                datasets: [{
-                    label: 'Refeições Hoje',
-                    data: [vCafe, vAlmoco, vJantar],
-                    backgroundColor: [
-                        'rgba(255, 206, 86, 0.8)', // Amarelo
-                        'rgba(75, 192, 192, 0.8)', // Verde
-                        'rgba(255, 99, 132, 0.8)'  // Vermelho/Rosa
-                    ],
-                    borderColor: [
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(255, 99, 132, 1)'
-                    ],
-                    borderWidth: 1,
-                    borderRadius: 5 // Barras arredondadas
-                }]
+    // 3. Monta os Datasets dinamicamente
+    const datasets = [];
+    let i = 0;
+
+    for (const [empresa, valores] of Object.entries(dadosEmpresas)) {
+        datasets.push({
+            label: empresa,          // Nome da Empresa aparece na legenda
+            data: valores,           // [QtdCafe, QtdAlmoco, QtdJantar]
+            backgroundColor: cores[i % cores.length], // Pega uma cor da lista (ciclando)
+            borderWidth: 1,
+            borderRadius: 4
+        });
+        i++;
+    }
+
+    const ctx = document.getElementById('graficoHome').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Café', 'Almoço', 'Jantar'], // As colunas
+            datasets: datasets // Nossos dados organizados por empresa
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { 
+                    display: true, // Agora mostramos a legenda para saber quem é quem
+                    labels: { color: '#fff' }
+                }, 
+                title: {
+                    display: true,
+                    text: 'Consumo por Empresa (' + new Date().toLocaleDateString('pt-BR') + ')',
+                    color: '#fff',
+                    font: { size: 16 }
+                }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }, // Esconde a legenda para ficar mais limpo
-                    title: {
-                        display: true,
-                        text: 'Consumo do Dia (' + new Date().toLocaleDateString('pt-BR') + ')',
-                        color: '#fff',
-                        font: { size: 16 }
-                    }
+            scales: {
+                x: {
+                    stacked: true, // <--- O PULO DO GATO: Empilha as barras
+                    grid: { display: false },
+                    ticks: { color: '#ddd', font: {size: 14} }
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        ticks: { color: '#ddd', stepSize: 1 }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#ddd', font: {size: 14} }
-                    }
+                y: {
+                    stacked: true, // <--- Empilha no eixo Y também
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    ticks: { color: '#ddd', stepSize: 1 }
                 }
             }
-        });
+        }
+    });
     </script>
 
 </body>

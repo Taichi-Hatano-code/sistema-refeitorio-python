@@ -30,22 +30,33 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    # 1. Lógica para contar as refeições de HOJE
     from datetime import datetime
     hoje = datetime.now().strftime("%d/%m/%Y")
     
     lista = db.quant_refei_detl(hoje)
     
-    totais = {"Cafe": 0, "Almoco": 0, "Jantar": 0}
+    # Estrutura: {'NomeEmpresa': [Cafe, Almoco, Jantar]}
+    dados_por_empresa = {}
     
     if lista:
         for ref in lista:
-            if "Café" in ref.tipo: totais["Cafe"] += 1
-            elif "Almoço" in ref.tipo: totais["Almoco"] += 1
-            elif "Jantar" in ref.tipo: totais["Jantar"] += 1
+            # Pega o nome da empresa (ou "Sem Empresa" se der erro)
+            nome_empresa = ref.funcionario.empresa if ref.funcionario else "Outros"
             
-    # 2. Passamos 'totais' para o index.html
-    return render_template('index.html', dados=totais)
+            # Se a empresa não existe no dicionário, cria ela zerada
+            if nome_empresa not in dados_por_empresa:
+                dados_por_empresa[nome_empresa] = [0, 0, 0] # [Cafe, Almoco, Jantar]
+            
+            # Soma na posição correta da lista
+            if "Café" in ref.tipo:
+                dados_por_empresa[nome_empresa][0] += 1
+            elif "Almoço" in ref.tipo:
+                dados_por_empresa[nome_empresa][1] += 1
+            elif "Jantar" in ref.tipo:
+                dados_por_empresa[nome_empresa][2] += 1
+            
+    # Enviamos esse dicionário complexo para o HTML
+    return render_template('index.html', dados=dados_por_empresa)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -86,84 +97,84 @@ def dashboard():
 @app.route('/paineladm')
 @login_required
 def paineladm():
-
     if current_user.cargo.lower() != 'admin':
-        flash('⛔ Acesso Negado! Você não tem permissão de administrador.')
-        return redirect(url_for('dashboard')) # Manda de volta pro painel comum
+        flash('⛔ Acesso Negado!')
+        return redirect(url_for('dashboard'))
 
-    # 1. Pega a data de hoje
     from datetime import datetime
     hoje = datetime.now().strftime("%d/%m/%Y")
     
-    # 2. Busca os dados no banco
     lista = db.quant_refei_detl(hoje)
     
-    # ... imports e data ...
-
-    # 1. Prepara os totais (Agora com as categorias de "Autorizado")
+    # 1. Totais Gerais (Para os Cards no topo da tela)
     totais = {
-        "Cafe": 0,   "Cafe_Autorizado": 0,
+        "Cafe": 0, "Cafe_Autorizado": 0,
         "Almoco": 0, "Almoco_Autorizado": 0,
         "Jantar": 0, "Jantar_Autorizado": 0
     }
-    
+
+    # 2. Dados para o Gráfico (Agrupado por Empresa)
+    # Estrutura: {'Empresa A': [QtdCafe, QtdAlmoco, QtdJantar]}
+    dados_grafico = {}
+
     if lista:
         for ref in lista:
-            # Segurança: Verifica se existe funcionário vinculado para não dar erro
-            cargo = ""
-            if ref.funcionario:
-                cargo = ref.funcionario.cargo.lower() # Converte para minúsculo para garantir
-
-            # Verifica se é Admin
+            # --- Lógica dos Totais (Mantive a sua original) ---
+            cargo = ref.funcionario.cargo.lower() if ref.funcionario else ""
             eh_admin = (cargo == 'admin')
 
-            # --- LÓGICA DO CAFÉ ---
             if "Café" in ref.tipo:
-                if eh_admin:
-                    totais["Cafe_Autorizado"] += 1
-                else:
-                    totais["Cafe"] += 1
-
-            # --- LÓGICA DO ALMOÇO ---
+                if eh_admin: totais["Cafe_Autorizado"] += 1
+                else: totais["Cafe"] += 1
             elif "Almoço" in ref.tipo:
-                if eh_admin:
-                    totais["Almoco_Autorizado"] += 1
-                else:
-                    totais["Almoco"] += 1
-
-            # --- LÓGICA DO JANTAR ---
+                if eh_admin: totais["Almoco_Autorizado"] += 1
+                else: totais["Almoco"] += 1
             elif "Jantar" in ref.tipo:
-                if eh_admin:
-                    totais["Jantar_Autorizado"] += 1
-                else:
-                    totais["Jantar"] += 1
-    
-    # Envia o dicionário completo para o HTML
-    return render_template('paineladm.html', dados=totais)
+                if eh_admin: totais["Jantar_Autorizado"] += 1
+                else: totais["Jantar"] += 1
+
+            # --- NOVA Lógica para o Gráfico (Por Empresa) ---
+            # Pega o nome da empresa do funcionário
+            nome_empresa = ref.funcionario.empresa if ref.funcionario else "Outros"
+
+            if nome_empresa not in dados_grafico:
+                dados_grafico[nome_empresa] = [0, 0, 0] # [Cafe, Almoco, Jantar]
+
+            if "Café" in ref.tipo: dados_grafico[nome_empresa][0] += 1
+            elif "Almoço" in ref.tipo: dados_grafico[nome_empresa][1] += 1
+            elif "Jantar" in ref.tipo: dados_grafico[nome_empresa][2] += 1
+
+    # Passamos AMBOS para o template: 'dados' (cards) e 'grafico' (chart.js)
+    return render_template('paineladm.html', dados=totais, grafico=dados_grafico)
 
 @app.route('/registrar_refeicao', methods=['POST'])
 @login_required
 def registrar_refeicao():
     # Pega o valor do input hidden (Cafe, Almoco ou Jantar)
     tipo_escolhido = request.form.get('tipo_refeicao')
-    
     hora_atual = datetime.now().hour
+    hoje = datetime.now().date()
 
-    if tipo_escolhido == "Café":
-        if not (6<= hora_atual < 10):
-            flash('❌ Horário inválido! O Café só é servido das 06:00 às 10:00.')
-            logout_user()
-            return redirect(url_for('login'))
-    elif tipo_escolhido == "Almoço":
-        if not (11 <= hora_atual < 15):
-            flash('❌ Horário inválido! O Almoço só é servido das 11:00 às 15:00.')
-            logout_user()
-            return redirect(url_for('login'))
-    elif tipo_escolhido == "Jantar":
-        if not (18 <= hora_atual < 22):
-            flash('❌ Horário inválido! O Jantar só é servido das 18:00 às 22:00.')
-            logout_user()
-            return redirect(url_for('login'))
+    # --- VALIDAÇÃO DE HORÁRIO (Seu código atual) ---
+    horarios = {
+        "Café": (5, 10),
+        "Almoço": (11, 15),
+        "Jantar": (18, 22)
+    }
+
+    if tipo_escolhido in horarios:
+        inicio, fim = horarios[tipo_escolhido]
+        if not (inicio <= hora_atual < fim):
+            flash(f'❌ Horário inválido para {tipo_escolhido}!')
+            return redirect(url_for('dashboard')) # Talvez não precise de logout aqui
+    
+    # --- NOVA VALIDAÇÃO: DUPLICIDADE ---
+    # Verifica se já existe registro para esse CPF + TIPO + DATA
+    ja_existe = db.verificar_duplicidade(current_user.cpf, tipo_escolhido)    
+    
+    if ja_existe:
+        flash(f'⚠️ Você já registrou seu {tipo_escolhido} hoje!')
+        return redirect(url_for('dashboard'))
     
     # Usa o seu dbmanager. 
     # Nota: Como o usuário já está logado, usamos os dados dele direto do current_user

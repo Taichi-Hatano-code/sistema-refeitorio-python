@@ -124,3 +124,26 @@ class dbmanager():
             except Exception as e:
                 print(f"Erro ao buscar usuário: {e}")
                 return 
+            
+    # No seu dbmanager ou arquivo de queries:
+    def verificar_duplicidade(self, cpf, tipo_refeicao):
+        # 1. Removemos 'session' dos argumentos e abrimos ela aqui dentro
+        with Session(self.engine) as session:
+            try:
+                # 2. Calculamos a data aqui dentro mesmo
+                hoje = datetime.now().date()
+                
+                stmt = select(models.Refeicao).where(
+                    models.Refeicao.funcionario_cpf == cpf,
+                    models.Refeicao.tipo == tipo_refeicao,
+                    cast(models.Refeicao.data, Date) == hoje
+                )
+                
+                resultado = session.scalars(stmt).first()
+                
+                # Retorna True se achou algo, False se não achou
+                return resultado is not None
+
+            except Exception as e:
+                print(f"Erro na verificação: {e}")
+                return False

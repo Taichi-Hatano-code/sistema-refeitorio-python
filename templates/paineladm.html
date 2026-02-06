@@ -182,4 +182,73 @@
     <a href="{{ url_for('home') }}" class="btn-voltar">← Voltar para Dashboard</a>
 
 </body>
+
+    <div class="chart-container" style="position: relative; height:40vh; width:80vw; margin: 20px auto;">
+    <canvas id="graficoAdm"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // 1. Recebe os dados específicos do gráfico que criamos no Python
+    const dadosEmpresas = {{ grafico | tojson }};
+
+    const cores = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+    ];
+
+    const datasets = [];
+    let i = 0;
+
+    for (const [empresa, valores] of Object.entries(dadosEmpresas)) {
+        datasets.push({
+            label: empresa,
+            data: valores,
+            backgroundColor: cores[i % cores.length],
+            borderWidth: 1,
+            borderRadius: 4
+        });
+        i++;
+    }
+
+    const ctx = document.getElementById('graficoAdm').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Café', 'Almoço', 'Jantar'],
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Ajuda a ajustar ao tamanho da div
+            plugins: {
+                legend: { 
+                    display: true,
+                    labels: { color: '#e0e0e0' } // Cor do texto da legenda
+                }, 
+                title: {
+                    display: true,
+                    text: 'Consumo Detalhado por Empresa',
+                    color: '#e0e0e0',
+                    font: { size: 16 }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true, // Empilhado
+                    grid: { display: false },
+                    ticks: { color: '#ccc' }
+                },
+                y: {
+                    stacked: true, // Empilhado
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    ticks: { color: '#ccc', stepSize: 1 }
+                }
+            }
+        }
+    });
+</script>
+
 </html>
