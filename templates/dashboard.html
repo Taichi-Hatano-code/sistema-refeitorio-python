@@ -203,5 +203,34 @@
 
     </div>
 
+    <audio id="audio-sucesso" src="{{ url_for('static', filename='sons/sucesso.mp3') }}" preload="auto"></audio>
+    <audio id="audio-erro" src="{{ url_for('static', filename='sons/erro.mp3') }}" preload="auto"></audio>
+
+    <script>
+        window.addEventListener('load', function() {
+            // 1. Procura pela mensagem que o Flask enviou (aquela div .flash-msg)
+            const flashMsg = document.querySelector('.flash-msg');
+            
+            if (flashMsg) {
+                const texto = flashMsg.innerText;
+                const somSucesso = document.getElementById('audio-sucesso');
+                const somErro = document.getElementById('audio-erro');
+
+                // 2. Verifica qual emoji o Python mandou na mensagem
+                // Baseado no seu web_site.py:
+                // Sucesso usa: ✅
+                // Erro de horário usa: ❌
+                // Duplicidade usa: ⚠️
+
+                if (texto.includes('✅')) {
+                    somSucesso.play().catch(e => console.log("Bloqueio de navegador ou erro: ", e));
+                } 
+                else if (texto.includes('❌') || texto.includes('⚠️')) {
+                    somErro.play().catch(e => console.log("Bloqueio de navegador ou erro: ", e));
+                }
+            }
+        });
+    </script>
+
 </body>
 </html>
